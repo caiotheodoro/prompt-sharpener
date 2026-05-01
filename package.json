@@ -1,0 +1,26 @@
+{
+  "name": "prompt-sharpener",
+  "version": "0.1.0",
+  "description": "A desktop overlay that sharpens prompts before you send them to coding AI assistants.",
+  "type": "module",
+  "packageManager": "pnpm@10.0.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caiotheodoro/prompt-sharpener.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "typescript": "^5",
+    "vite": "^6"
+  }
+}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Sharpener</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+
+    <!-- ── Overlay window ──────────────────────────── -->
+    <div id="overlay" class="hidden">
+      <div class="chrome">
+        <div class="chrome__left">
+          <span class="brand-dot"></span>
+          <span class="brand-name">sharpener</span>
+        </div>
+        <div class="chrome__actions">
+          <button id="btn-settings" class="chrome__icon-btn" title="Settings" aria-label="Open settings">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+          <button id="btn-close" class="chrome__icon-btn chrome__icon-btn--close" title="Close" aria-label="Close">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <main class="body">
+        <div id="state-idle" class="panel">
+          <p class="idle-hint">Select text · press <kbd>Ctrl+Alt+P</kbd></p>
+        </div>
+
+        <div id="state-loading" class="panel hidden">
+          <div class="loading">
+            <span class="pulse-dot"></span>
+            <span class="pulse-dot"></span>
+            <span class="pulse-dot"></span>
+          </div>
+        </div>
+
+        <div id="state-error" class="panel hidden">
+          <p id="error-msg" class="error-text"></p>
+          <button id="btn-dismiss" class="btn-ghost">dismiss</button>
+        </div>
+
+        <div id="state-ready" class="panel hidden">
+          <div id="sharpened-text" class="result-box"></div>
+          <div class="actions">
+            <button id="btn-accept" class="btn-accept">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              accept
+            </button>
+            <button id="btn-reject" class="btn-ghost">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              discard
+            </button>
+          </div>
+          <p class="esc-hint">esc</p>
+        </div>
+      </main>
+      <div id="resize-handle" class="resize-handle" title="Resize"></div>
+    </div>
+
+    <!-- ── Settings window ─────────────────────────── -->
+    <div id="settings" class="hidden">
+      <div class="settings-chrome">
+        <div class="settings-chrome__left">
+          <span class="brand-dot"></span>
+          <span class="settings-title">prompt sharpener</span>
+          <span class="settings-subtitle">/ settings</span>
+        </div>
+      </div>
+      <div class="settings-body">
+        <label class="field">
+          <span class="field__label">provider</span>
+          <select id="provider-select" class="field__input field__select">
+            <option value="anthropic">Anthropic</option>
+            <option value="openai">OpenAI</option>
+            <option value="gemini">Google Gemini</option>
+            <option value="ollama">Ollama (local)</option>
+          </select>
+        </label>
+        <label class="field">
+          <span id="api-key-label" class="field__label">Anthropic API key</span>
+          <input type="password" id="api-key-input" class="field__input" placeholder="sk-ant-…" autocomplete="off" spellcheck="false" />
+        </label>
+        <div id="ollama-notice" class="ollama-notice hidden">
+          <p>Requires Ollama installed and running. Start with <code>ollama pull qwen3:1.7b</code>.</p>
+          <button id="btn-check-ollama" class="btn-status" type="button">
+            <span id="ollama-status-dot" class="status-dot status-dot--idle"></span>
+            <span id="ollama-status-text">check Ollama status</span>
+          </button>
+        </div>
+        <label class="field">
+          <span class="field__label">model</span>
+          <select id="model-select" class="field__input field__select"></select>
+        </label>
+        <label class="field">
+          <span class="field__label">accept target</span>
+          <select id="accept-mode-select" class="field__input field__select">
+            <option value="terminal">Terminal — clear input, then paste</option>
+            <option value="editor">Editor — replace selected text</option>
+          </select>
+        </label>
+        <button id="btn-save" class="btn-save">save</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

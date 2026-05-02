@@ -6,6 +6,18 @@ It sits in the background, waits for a global shortcut, reads the text you are a
 
 The goal is simple: keep your flow, but make every prompt clearer before it reaches the model.
 
+<table>
+  <tr>
+    <td>
+      <img width="1046" height="475" alt="image" src="https://github.com/user-attachments/assets/5bac9e89-62ab-4bf6-bea6-d583acb928bf" />
+    </td>
+    <td>
+      <img width="398" height="476" alt="image" src="https://github.com/user-attachments/assets/3011672b-8646-4ad0-8c21-af5cfd49a755" />
+    </td>
+  </tr>
+</table>
+
+
 ## Why It Exists
 
 Coding assistants are sensitive to prompt quality. A prompt like:
@@ -32,6 +44,7 @@ usually makes the model guess. Prompt Sharpener rewrites it into something more 
   - Ollama running locally
 - Local-first option with Ollama and Qwen3 models.
 - API keys stored locally through Tauri's app store.
+
 
 ## How It Works
 

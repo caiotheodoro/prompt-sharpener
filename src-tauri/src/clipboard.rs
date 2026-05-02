@@ -46,10 +46,6 @@ fn simulate_clear_line(clear_passes: usize) {
             std::thread::sleep(std::time::Duration::from_millis(8));
         }
 
-        let _ = e.key(Key::Control, Press);
-        let _ = e.key(Key::Unicode('a'), Click);
-        let _ = e.key(Key::Unicode('k'), Click);
-        let _ = e.key(Key::Control, Release);
     }
 }
 

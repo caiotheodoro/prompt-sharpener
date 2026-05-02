@@ -294,7 +294,7 @@ fn system_prompt(mode: &str) -> String {
     let rules = "Process:
 1. Assess the prompt for missing task, constraints, output format, context, examples, and edge cases.
 2. Rewrite it as precise instruction/spec language using concrete verbs and no filler.
-3. Validate that every gap you identified is addressed without inventing facts.
+3. Validate that every gap you identified is addressed without inventing facts or asking follow-up questions.
 
 Rules:
 1. Return ONLY the improved prompt. No explanation, no preamble, no quotes.
@@ -306,7 +306,8 @@ Rules:
 7. If the user pasted a link or path as the object of the task, keep it in the improved prompt and build the task around it; never summarize it away.
 8. Keep the result between 0.75x and 1.5x the original length unless the original is too vague to work safely.
 9. Specify exactly one output format when the original prompt implies or requests a format.
-10. If critical information is missing and cannot be inferred from the original prompt, ask a concise clarification question instead of guessing.
+10. Do not ask clarification questions. The output must be ready for the user to paste directly into the target AI assistant.
+11. If critical information is missing and the prompt cannot be sharpened safely, return exactly: I'm not able to sharpen this without more context.
 
 Do NOT add: polite phrasing, \"best practices\" without specifics, chain-of-thought requests, role framing, examples, or requirements the user didn't imply.";
 
@@ -315,7 +316,7 @@ Do NOT add: polite phrasing, \"best practices\" without specifics, chain-of-thou
             "{persona}\n\n\
             Task: Add missing context that a coding AI would need to avoid ambiguity. \
             Specify the scope, constraints, expected output, and success criteria. \
-            Ask a short clarification question if the missing context is essential and absent.\n\n\
+            If essential context is absent, use the fixed insufficient-context fallback from the global rules.\n\n\
             Examples:\n\
             Input: \"add tests\"\n\
             Output: \"Add unit tests for the UserService class in src/services/user.ts \
@@ -358,7 +359,7 @@ Do NOT add: polite phrasing, \"best practices\" without specifics, chain-of-thou
             Remove filler, replace vague verbs with measurable actions, and preserve all pasted references.\n\n\
             Before writing, silently ask: What is the user actually trying to accomplish? \
             What constraints and output format would prevent guessing? \
-            Is anything critical missing that requires a clarification question?\n\n\
+            Is anything critical missing that makes the prompt impossible to sharpen safely?\n\n\
             Examples:\n\
             Input: \"fix the login bug\"\n\
             Output: \"Fix the bug in auth/login.ts where validateToken() returns false \

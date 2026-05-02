@@ -38,10 +38,6 @@ pub async fn replace_line_text(
 
 fn simulate_clear_line(clear_passes: usize) {
     if let Ok(mut e) = Enigo::new(&Settings::default()) {
-        let _ = e.key(Key::Control, Press);
-        let _ = e.key(Key::Unicode('e'), Click);
-        let _ = e.key(Key::Control, Release);
-
         for _ in 0..clear_passes {
             let _ = e.key(Key::Control, Press);
             let _ = e.key(Key::Unicode('u'), Click);

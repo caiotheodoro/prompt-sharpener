@@ -3,8 +3,30 @@ name: Build
 on:
   push:
     branches: ["main"]
+    paths:
+      - ".cargo/**"
+      - ".github/workflows/build.yml"
+      - ".github/workflows/release.yml"
+      - "index.html"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "src/**"
+      - "src-tauri/**"
+      - "tsconfig.json"
+      - "vite.config.ts"
   pull_request:
     branches: ["main"]
+    paths:
+      - ".cargo/**"
+      - ".github/workflows/build.yml"
+      - ".github/workflows/release.yml"
+      - "index.html"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "src/**"
+      - "src-tauri/**"
+      - "tsconfig.json"
+      - "vite.config.ts"
 
 jobs:
   build:

@@ -187,21 +187,6 @@ Windows cross-build from WSL, as used during development:
 CI=false npx tauri build --target x86_64-pc-windows-gnu --no-bundle
 ```
 
-## Release Workflow
-
-This repository is configured so:
-
-- Every push and pull request builds the app on Windows, macOS, and Linux and uploads artifacts.
-- Every tag matching `v*` builds native platform bundles and attaches them to a GitHub Release.
-
-To publish a release:
-
-```bash
-git tag v0.1.0
-git push origin main
-git push origin v0.1.0
-```
-
 ## Security
 
 - API keys are stored locally through Tauri's app store.

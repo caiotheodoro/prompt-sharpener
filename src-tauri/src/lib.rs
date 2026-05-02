@@ -16,8 +16,10 @@ async fn sharpen_prompt(
     provider: String,
     api_key: String,
     model: String,
+    app: tauri::AppHandle,
 ) -> Result<String, String> {
-    llm::call(&text, &mode, &provider, &api_key, &model).await
+    let system_prompt = settings::get(&app, "system_prompt").ok();
+    llm::call(&text, &mode, system_prompt, &provider, &api_key, &model).await
 }
 
 #[tauri::command]
@@ -28,6 +30,16 @@ async fn get_setting(key: String, app: tauri::AppHandle) -> Result<String, Strin
 #[tauri::command]
 async fn set_setting(key: String, value: String, app: tauri::AppHandle) -> Result<(), String> {
     settings::set(&app, &key, &value)
+}
+
+#[tauri::command]
+async fn get_default_system_prompt() -> Result<String, String> {
+    Ok(llm::default_system_prompt())
+}
+
+#[tauri::command]
+async fn update_hotkey(shortcut: String, app: tauri::AppHandle) -> Result<(), String> {
+    hotkey::update(&app, &shortcut)
 }
 
 #[tauri::command]
@@ -91,6 +103,8 @@ pub fn run() {
             sharpen_prompt,
             get_setting,
             set_setting,
+            get_default_system_prompt,
+            update_hotkey,
             paste_text,
             replace_line_text,
             open_settings,

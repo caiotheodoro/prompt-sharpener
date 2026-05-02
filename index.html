@@ -105,6 +105,20 @@
             <option value="editor">Editor — replace selected text</option>
           </select>
         </label>
+        <label class="field">
+          <span class="field__label">global hotkey</span>
+          <input id="hotkey-input" class="field__input" placeholder="Ctrl+Alt+P" autocomplete="off" spellcheck="false" />
+        </label>
+        <div class="prompt-editor">
+          <button id="btn-toggle-system-prompt" class="btn-secondary" type="button">edit system prompt</button>
+          <div id="system-prompt-panel" class="system-prompt-panel hidden">
+            <label class="field">
+              <span class="field__label">system prompt</span>
+              <textarea id="system-prompt-input" class="field__input field__textarea" spellcheck="false"></textarea>
+            </label>
+            <button id="btn-reset-system-prompt" class="btn-secondary" type="button">reset default</button>
+          </div>
+        </div>
         <button id="btn-save" class="btn-save">save</button>
       </div>
     </div>

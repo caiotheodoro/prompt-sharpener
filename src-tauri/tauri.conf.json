@@ -32,10 +32,11 @@
       {
         "label": "settings",
         "title": "Prompt Sharpener — Settings",
-        "width": 400,
-        "height": 470,
+        "width": 520,
+        "height": 620,
         "resizable": false,
         "visible": false,
+        "alwaysOnTop": true,
         "decorations": true,
         "center": true
       }

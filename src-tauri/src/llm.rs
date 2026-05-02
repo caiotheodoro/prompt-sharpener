@@ -67,12 +67,15 @@ struct GeminiPart {
 pub async fn call(
     text: &str,
     mode: &str,
+    system_override: Option<String>,
     provider: &str,
     api_key: &str,
     model: &str,
 ) -> Result<String, String> {
     let client = reqwest::Client::new();
-    let system = system_prompt(mode);
+    let system = system_override
+        .filter(|prompt| !prompt.trim().is_empty())
+        .unwrap_or_else(|| system_prompt(mode));
 
     match provider {
         "anthropic" => call_anthropic(&client, text, &system, api_key, model).await,
@@ -284,6 +287,10 @@ async fn call_ollama(
         .filter_map(|choice| choice.message.content)
         .find(|text| !text.trim().is_empty())
         .ok_or_else(|| "No text in Ollama response".to_string())
+}
+
+pub fn default_system_prompt() -> String {
+    system_prompt("sharpen")
 }
 
 fn system_prompt(mode: &str) -> String {

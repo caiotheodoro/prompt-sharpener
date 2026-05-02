@@ -3,9 +3,10 @@ use enigo::{
     Enigo, Key, Keyboard, Settings,
 };
 use serde::Serialize;
+use std::str::FromStr;
 use tauri::{AppHandle, Emitter};
 use tauri_plugin_clipboard_manager::ClipboardExt;
-use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -22,13 +23,50 @@ enum AcceptBehavior {
 }
 
 pub fn register(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-    #[cfg(target_os = "macos")]
-    let modifier = Modifiers::SUPER | Modifiers::ALT;
-    #[cfg(not(target_os = "macos"))]
-    let modifier = Modifiers::CONTROL | Modifiers::ALT;
+    let configured_shortcut =
+        crate::settings::get(app.handle(), "hotkey").unwrap_or_else(|_| default_shortcut_label());
+    if let Err(err) = register_shortcut(app.handle(), &configured_shortcut) {
+        eprintln!("[hotkey] configured shortcut failed, falling back to default: {err}");
+        register_shortcut(app.handle(), &default_shortcut_label())?;
+    }
 
-    let shortcut = Shortcut::new(Some(modifier), Code::KeyP);
-    let handle = app.handle().clone();
+    Ok(())
+}
+
+pub fn update(app: &AppHandle, shortcut_label: &str) -> Result<(), String> {
+    let normalized = normalize_shortcut_label(shortcut_label)?;
+    let previous = crate::settings::get(app, "hotkey").unwrap_or_else(|_| default_shortcut_label());
+
+    app.global_shortcut()
+        .unregister_all()
+        .map_err(|e| e.to_string())?;
+    if let Err(err) = register_shortcut(app, &normalized) {
+        let _ = register_shortcut(app, &previous);
+        return Err(err.to_string());
+    }
+
+    crate::settings::set(app, "hotkey", &normalized)?;
+    Ok(())
+}
+
+pub fn default_shortcut_label() -> String {
+    #[cfg(target_os = "macos")]
+    {
+        "Super+Alt+P".to_string()
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        "Ctrl+Alt+P".to_string()
+    }
+}
+
+fn register_shortcut(
+    app: &AppHandle,
+    shortcut_label: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let shortcut = Shortcut::from_str(shortcut_label)?;
+    let handle = app.clone();
 
     match app
         .global_shortcut()
@@ -37,11 +75,21 @@ pub fn register(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                 trigger_capture(&handle);
             }
         }) {
-        Ok(_) => eprintln!("[hotkey] Ctrl+Alt+P registered"),
+        Ok(_) => eprintln!("[hotkey] {shortcut_label} registered"),
         Err(e) => eprintln!("[hotkey] FAILED to register: {e}"),
     }
 
     Ok(())
+}
+
+fn normalize_shortcut_label(shortcut_label: &str) -> Result<String, String> {
+    let normalized = shortcut_label.trim().replace(' ', "");
+    if normalized.is_empty() {
+        return Err("Hotkey cannot be empty".to_string());
+    }
+
+    Shortcut::from_str(&normalized).map_err(|e| format!("Invalid hotkey: {e}"))?;
+    Ok(normalized)
 }
 
 fn trigger_capture(app: &AppHandle) {

@@ -68,6 +68,10 @@ const PROVIDER_KEY_PLACEHOLDER: Record<Provider, string> = {
   ollama: "No API key required",
 };
 
+const DEFAULT_HOTKEY = navigator.userAgent.toLowerCase().includes("mac")
+  ? "Super+Alt+P"
+  : "Ctrl+Alt+P";
+
 function isProvider(value: string): value is Provider {
   return value === "anthropic" || value === "openai" || value === "gemini" || value === "ollama";
 }
@@ -354,6 +358,11 @@ async function initSettings() {
   const apiKeyInput = document.getElementById("api-key-input") as HTMLInputElement;
   const modelSelect = document.getElementById("model-select") as HTMLSelectElement;
   const acceptModeSelect = document.getElementById("accept-mode-select") as HTMLSelectElement;
+  const hotkeyInput = document.getElementById("hotkey-input") as HTMLInputElement;
+  const systemPromptInput = document.getElementById("system-prompt-input") as HTMLTextAreaElement;
+  const systemPromptPanel = document.getElementById("system-prompt-panel") as HTMLElement;
+  const toggleSystemPromptButton = document.getElementById("btn-toggle-system-prompt") as HTMLButtonElement;
+  const resetSystemPromptButton = document.getElementById("btn-reset-system-prompt") as HTMLButtonElement;
   const ollamaNotice = document.getElementById("ollama-notice") as HTMLElement;
   const checkOllamaButton = document.getElementById("btn-check-ollama") as HTMLButtonElement;
   const ollamaStatusDot = document.getElementById("ollama-status-dot") as HTMLElement;
@@ -412,6 +421,22 @@ async function initSettings() {
     acceptModeSelect.value = "terminal";
   }
 
+  try {
+    hotkeyInput.value = await invoke<string>("get_setting", { key: "hotkey" });
+  } catch {
+    hotkeyInput.value = DEFAULT_HOTKEY;
+  }
+
+  async function loadDefaultSystemPrompt() {
+    systemPromptInput.value = await invoke<string>("get_default_system_prompt");
+  }
+
+  try {
+    systemPromptInput.value = await invoke<string>("get_setting", { key: "system_prompt" });
+  } catch {
+    await loadDefaultSystemPrompt();
+  }
+
   await renderProviderSettings(currentProvider);
 
   providerSelect.addEventListener("change", async () => {
@@ -433,12 +458,37 @@ async function initSettings() {
     }
   });
 
+  hotkeyInput.addEventListener("keydown", (e) => {
+    e.preventDefault();
+    const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
+    if (["Control", "Alt", "Shift", "Meta"].includes(key)) return;
+
+    const parts: string[] = [];
+    if (e.ctrlKey) parts.push("Ctrl");
+    if (e.metaKey) parts.push("Super");
+    if (e.altKey) parts.push("Alt");
+    if (e.shiftKey) parts.push("Shift");
+    parts.push(key.replace("Arrow", ""));
+    hotkeyInput.value = parts.join("+");
+  });
+
+  toggleSystemPromptButton.addEventListener("click", () => {
+    const isHidden = systemPromptPanel.classList.toggle("hidden");
+    toggleSystemPromptButton.textContent = isHidden ? "edit system prompt" : "hide system prompt";
+  });
+
+  resetSystemPromptButton.addEventListener("click", async () => {
+    await loadDefaultSystemPrompt();
+  });
+
   const saveBtn = document.getElementById("btn-save")!;
   saveBtn.addEventListener("click", async () => {
     const provider = isProvider(providerSelect.value) ? providerSelect.value : DEFAULT_PROVIDER;
     const apiKey = apiKeyInput.value.trim();
     const model = modelSelect.value || defaultModel(provider);
     const acceptMode = acceptModeSelect.value;
+    const hotkey = hotkeyInput.value.trim() || DEFAULT_HOTKEY;
+    const systemPrompt = systemPromptInput.value.trim();
     if (provider !== "ollama") {
       keyCache[provider] = apiKey;
     }
@@ -452,6 +502,16 @@ async function initSettings() {
     }
     await invoke("set_setting", { key: "model", value: model });
     await invoke("set_setting", { key: "accept_mode", value: acceptMode });
+    await invoke("set_setting", { key: "system_prompt", value: systemPrompt });
+    try {
+      await invoke("update_hotkey", { shortcut: hotkey });
+      hotkeyInput.value = hotkey;
+    } catch (err) {
+      saveBtn.textContent = "hotkey error";
+      hotkeyInput.title = err instanceof Error ? err.message : String(err);
+      setTimeout(() => { saveBtn.textContent = "save"; }, 2000);
+      return;
+    }
     saveBtn.textContent = "✓ saved";
     setTimeout(() => { saveBtn.textContent = "save"; }, 2000);
   });

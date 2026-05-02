@@ -38,6 +38,19 @@ pub fn install_settings_close_handler(app: &App) {
 
 pub fn show_settings(app: &AppHandle) {
     if let Some(win) = app.get_webview_window("settings") {
+        if let Some(overlay) = app.get_webview_window("overlay") {
+            if let (Ok(overlay_pos), Ok(overlay_size), Ok(settings_size)) = (
+                overlay.outer_position(),
+                overlay.outer_size(),
+                win.outer_size(),
+            ) {
+                let x = overlay_pos.x
+                    + ((overlay_size.width as i32 - settings_size.width as i32) / 2).max(0);
+                let y = overlay_pos.y
+                    + ((overlay_size.height as i32 - settings_size.height as i32) / 2).max(0);
+                win.set_position(PhysicalPosition::new(x, y)).ok();
+            }
+        }
         win.show().ok();
         win.set_focus().ok();
     }

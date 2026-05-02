@@ -385,6 +385,8 @@ button:focus-visible {
   flex-direction: column;
   gap: 12px;
   padding: 14px 12px;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .field {
@@ -416,6 +418,14 @@ button:focus-visible {
 }
 
 .field__input:focus { border-color: var(--accent); }
+
+.field__textarea {
+  min-height: 210px;
+  height: 210px;
+  padding: 10px;
+  line-height: 1.45;
+  resize: vertical;
+}
 
 .field__select {
   font-family: var(--font-ui);
@@ -480,10 +490,25 @@ button:focus-visible {
 .status-dot--ok { background: var(--green); }
 .status-dot--error { background: var(--red); }
 
-.btn-save {
+.prompt-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.system-prompt-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.025);
+}
+
+.btn-save,
+.btn-secondary {
   height: 32px;
-  background: var(--accent);
-  color: #fff;
   border: none;
   border-radius: var(--radius-sm);
   font-family: var(--font-ui);
@@ -496,7 +521,23 @@ button:focus-visible {
   padding: 0 18px;
 }
 
+.btn-save {
+  background: var(--accent);
+  color: #fff;
+}
+
 .btn-save:hover { background: #8a6aeb; }
+
+.btn-secondary {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.07);
+  color: var(--text-1);
+}
 
 /* ── Reduced motion ──────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
